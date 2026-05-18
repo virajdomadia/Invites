@@ -1,8 +1,10 @@
 {
   "expo": {
+    "owner": "virajdomadia06",
     "name": "invites",
     "slug": "invites",
     "version": "1.0.0",
+    "sdkVersion": "55.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "invites",
@@ -17,7 +19,7 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "package": "com.virajdomadia06.invites"
     },
     "web": {
       "output": "static",
@@ -39,6 +41,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4792167b-b338-473c-819e-a7f9a0e39c62"
+      },
+      "apiUrl": "http://localhost:8000"
     }
   }
 }

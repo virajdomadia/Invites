@@ -1,21 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-let Google: any = null;
+let GoogleAuth: any = null;
 let WebBrowser: any = null;
 
 try {
-  // Try to import native modules
   WebBrowser = require('expo-web-browser');
-  Google = require('expo-auth-session/providers/google');
+  GoogleAuth = require('expo-auth-session/providers/google');
   WebBrowser.maybeCompleteAuthSession?.();
-} catch (e) {
-  // Fallback for web/development
+} catch {
   console.warn('Using auth fallback for web environment');
-  Google = { useAuthRequest: () => [null, null, async () => ({ type: 'dismiss' })] };
+  GoogleAuth = { useAuthRequest: null };
   WebBrowser = { maybeCompleteAuthSession: () => {} };
 }
 
-// Google OAuth Client IDs - update with your actual client IDs
 export const GOOGLE_CLIENT_IDS = {
   web: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB || '',
   android: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID || '',
@@ -23,8 +20,9 @@ export const GOOGLE_CLIENT_IDS = {
 };
 
 export const useGoogleAuth = () => {
-  const [request, response, promptAsync] = Google?.useAuthRequest
-    ? Google.useAuthRequest({
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const authRequest = GoogleAuth?.useAuthRequest
+    ? GoogleAuth.useAuthRequest({
         clientId: GOOGLE_CLIENT_IDS.web,
         iosClientId: GOOGLE_CLIENT_IDS.ios,
         androidClientId: GOOGLE_CLIENT_IDS.android,
@@ -32,6 +30,7 @@ export const useGoogleAuth = () => {
       })
     : [null, null, async () => ({ type: 'dismiss' })];
 
+  const [request, response, promptAsync] = authRequest;
   const [idToken, setIdToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +38,7 @@ export const useGoogleAuth = () => {
 
   useEffect(() => {
     if (response?.type === 'success') {
-      const { id_token, access_token } = response.params;
+      const { id_token } = response.params;
       if (id_token) {
         setIdToken(id_token);
         decodeToken(id_token);
@@ -57,9 +56,8 @@ export const useGoogleAuth = () => {
         throw new Error('Invalid token format');
       }
 
-      const decoded = JSON.parse(
-        Buffer.from(parts[1], 'base64').toString('utf-8')
-      );
+      // Use atob for base64 decoding (available in all JS environments)
+      const decoded = JSON.parse(atob(parts[1]));
 
       setUserInfo({
         email: decoded.email,
@@ -69,7 +67,7 @@ export const useGoogleAuth = () => {
       });
 
       setLoading(false);
-    } catch (err) {
+    } catch {
       setError('Failed to decode token');
       setLoading(false);
     }

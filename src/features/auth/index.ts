@@ -10,4 +10,5 @@ export { GoogleSignInButton } from './components/google-sign-in-button';
 
 // Screens - export as default for use in app routing
 export { default as LoginScreen } from './screens/login';
+export { default as RegisterScreen } from './screens/register';
 export { default as PhoneVerifyScreen } from './screens/phone-verify';

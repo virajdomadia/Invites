@@ -5,8 +5,8 @@ import { router } from 'expo-router';
 export default function LoginScreen() {
   const handleSignInSuccess = (isNewUser: boolean) => {
     if (isNewUser) {
-      // New user - redirect to phone verification or onboarding
-      router.replace('/phone-verify');
+      // New user - redirect to registration/profile completion
+      router.replace('/register');
     } else {
       // Existing user - redirect to home
       router.replace('/');

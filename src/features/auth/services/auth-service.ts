@@ -18,12 +18,21 @@ interface User {
   is_new_user: boolean;
 }
 
+interface GoogleProfile {
+  email: string;
+  name: string;
+  picture?: string;
+  sub?: string;
+}
+
 interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   tokens: { access: string; refresh: string } | null;
   loading: boolean;
   error: string | null;
+  googleProfile: GoogleProfile | null;
+  authMethod: 'google' | 'phone' | null;
 }
 
 const SECURE_STORE_KEYS = {
@@ -39,6 +48,8 @@ export class AuthService {
     tokens: null,
     loading: false,
     error: null,
+    googleProfile: null,
+    authMethod: null,
   };
 
   private listeners: ((state: AuthState) => void)[] = [];
@@ -64,6 +75,8 @@ export class AuthService {
           tokens: { access: accessToken, refresh: refreshToken },
           loading: false,
           error: null,
+          googleProfile: null,
+          authMethod: null,
         };
         this.notifyListeners();
       }
@@ -123,6 +136,8 @@ export class AuthService {
         tokens: { access: access_token, refresh: refresh_token },
         loading: false,
         error: null,
+        googleProfile: googleUserInfo,
+        authMethod: 'google',
       };
 
       this.notifyListeners();
@@ -187,6 +202,8 @@ export class AuthService {
       tokens: null,
       loading: false,
       error: null,
+      googleProfile: null,
+      authMethod: null,
     };
 
     this.notifyListeners();
@@ -262,6 +279,11 @@ export class AuthService {
 
   getAccessToken(): string | null {
     return this.state.tokens?.access || null;
+  }
+
+  clearGoogleProfile(): void {
+    this.state.googleProfile = null;
+    this.notifyListeners();
   }
 }
 

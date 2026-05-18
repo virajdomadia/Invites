@@ -31,7 +31,10 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
+.env
+.env.local
+.env.*.local
+.env.production.local
 
 # typescript
 *.tsbuildinfo
@@ -41,3 +44,33 @@ app-example
 # generated native folders
 /ios
 /android
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Secrets & Credentials
+*.pem
+*.key
+*.p8
+*.p12
+*.jks
+.aws/
+.gcloud/
+client_*.plist
+client_secret_*.json
+
+# Build outputs
+.next/
+build/
+dist/
+out/
+
+# Dependencies lock files (optional - keep if you want to sync versions)
+# npm-shrinkwrap.json
+# yarn.lock
+# pnpm-lock.yaml

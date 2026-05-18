@@ -1,0 +1,273 @@
+================================================================================
+                    INVITES APP - NEW FOLDER STRUCTURE
+================================================================================
+
+invites/
+│
+├── src/
+│   │
+│   ├── 🔄 app/                                    [APP ROUTING]
+│   │   ├── _layout.tsx         ────┐
+│   │   ├── index.tsx           ────┼─→ Routes to features
+│   │   ├── login.tsx           ────┤
+│   │   └── phone-verify.tsx    ────┘
+│   │
+│   ├── 🔧 core/                                   [SHARED UTILITIES]
+│   │   │
+│   │   ├── api/
+│   │   │   └── api.ts                 API client (fetch wrapper)
+│   │   │       ├── get()
+│   │   │       ├── post()
+│   │   │       ├── put()
+│   │   │       ├── delete()
+│   │   │       └── patch()
+│   │   │
+│   │   ├── hooks/
+│   │   │   └── useApi.ts               Reusable API hook
+│   │   │       ├── state: {data, loading, error}
+│   │   │       ├── get()
+│   │   │       └── post()
+│   │   │
+│   │   ├── constants/
+│   │   │   └── index.ts               App-wide constants
+│   │   │       ├── COLORS
+│   │   │       ├── SPACING
+│   │   │       ├── TYPOGRAPHY
+│   │   │       └── APP_NAME
+│   │   │
+│   │   └── index.ts                   Core exports
+│   │
+│   ├── ✨ features/                                 [FEATURE MODULES]
+│   │   │
+│   │   ├── auth/                      ┌───────────────────────────┐
+│   │   │   │                          │ AUTHENTICATION FEATURE    │
+│   │   │   ├── components/            │                           │
+│   │   │   │   └── google-sign-in-button.tsx   Google Sign button │
+│   │   │   │                          │                           │
+│   │   │   ├── screens/               │                           │
+│   │   │   │   ├── login.tsx          │ Login screen             │
+│   │   │   │   └── phone-verify.tsx   │ Phone verification       │
+│   │   │   │                          │                           │
+│   │   │   ├── services/              │                           │
+│   │   │   │   ├── google-auth.ts     │ Google OAuth logic       │
+│   │   │   │   └── auth-service.ts    │ Auth state management    │
+│   │   │   │                          │                           │
+│   │   │   ├── hooks/                 │                           │
+│   │   │   │   └── useAuth.ts         │ Auth state hook          │
+│   │   │   │                          │                           │
+│   │   │   └── index.ts               │ Feature exports          │
+│   │   │                              └───────────────────────────┘
+│   │   │
+│   │   ├── home/                      ┌───────────────────────────┐
+│   │   │   │                          │ HOME/DASHBOARD FEATURE    │
+│   │   │   ├── screens/               │                           │
+│   │   │   │   └── index.tsx          │ Home screen              │
+│   │   │   │                          │                           │
+│   │   │   └── index.ts               │ Feature exports          │
+│   │   │                              └───────────────────────────┘
+│   │   │
+│   │   └── index.ts                   Master features exports
+│   │
+│   ├── global.css                                 [GLOBAL STYLES]
+│   │
+│   └── types/                                     [TYPE DEFINITIONS]
+│       └── index.ts
+│
+├── .env                                           [ENVIRONMENT CONFIG]
+├── .env.example
+├── package.json
+├── app.json
+│
+└── 📚 DOCUMENTATION FILES
+    ├── PROJECT_STRUCTURE.md          ← Start here!
+    ├── FEATURE_STRUCTURE_GUIDE.md    ← Visual guide
+    ├── MIGRATION_COMPLETE.md         ← What changed
+    ├── CLEANUP_GUIDE.md              ← Delete old files
+    ├── GOOGLE_AUTH_SETUP.md          ← OAuth setup
+    └── FOLDER_STRUCTURE_VISUAL.txt   ← This file
+
+================================================================================
+                              FEATURE FLOW
+================================================================================
+
+USER                          APP                    BACKEND
+│                             │                      │
+│─────── Tap Login ────────→ src/app/login.tsx      │
+│                             │                      │
+│                             │─ Import from         │
+│                             │  features/auth       │
+│                             │                      │
+│                        LoginScreen                 │
+│                             │                      │
+│                             │─ Render              │
+│                             │  GoogleSignInButton  │
+│                             │                      │
+│─────── Tap Sign In ────────→ GoogleSignInButton    │
+│                             │                      │
+│                             │─ Call useGoogleAuth  │
+│                             │                      │
+│  Google OAuth Flow          │                      │
+│◄────────────────────────────┼─────────────────────→│
+│                             │  (Google handles)    │
+│ Returns ID Token            │                      │
+│─────────────────────────────┼─────────────────────→│
+│                             │                      │
+│                             │─ Call authService    │
+│                             │  .loginWithGoogle()  │
+│                             │                      │
+│                             │─ Call apiClient      │
+│                             │  .post('/auth/login')│
+│                             │─────────────────────→│ Verify ID token
+│                             │                      │ Create user
+│                             │◄──────────────────────│ Return tokens
+│                             │                      │
+│                             │─ Save to secure      │
+│                             │  storage             │
+│                             │                      │
+│  Navigate to home           │                      │
+│◄────────────────────────────┼──────────────────────→│
+│                             │                      │
+
+================================================================================
+                          IMPORT PATTERNS
+================================================================================
+
+# From same feature:
+import { useAuth } from '../hooks/useAuth';
+import { authService } from '../services/auth-service';
+
+# From different feature:
+import { useAuth } from '../../features/auth';
+
+# From core:
+import { apiClient } from '../../../core/api/api';
+import { COLORS, SPACING } from '../../../core/constants';
+
+# Using clean exports (recommended):
+import { useAuth, authService } from '../features/auth';
+
+================================================================================
+                         DEPENDENCIES GRAPH
+================================================================================
+
+                    ┌─────────────────┐
+                    │    FEATURES     │
+                    │   (Auth, Home)  │
+                    └────────┬────────┘
+                             │
+                             │ depends on
+                             ▼
+                    ┌─────────────────┐
+                    │      CORE       │
+                    │  (API, Utils)   │
+                    └─────────────────┘
+                             │
+                             │ depends on
+                             ▼
+                    ┌─────────────────┐
+                    │  REACT NATIVE   │
+                    │   & EXPO        │
+                    └─────────────────┘
+
+✓ Rules followed:
+  • Features depend on Core
+  • Core is independent
+  • No circular dependencies
+  • Easy to swap implementations
+
+================================================================================
+                    FILES TO DELETE (OLD STRUCTURE)
+================================================================================
+
+❌ src/services/          (old - moved to features/auth/services/)
+   ├── google-auth.ts
+   ├── auth-service.ts
+   └── api.ts
+
+❌ src/hooks/             (old - moved to features/auth/hooks/ and core/hooks/)
+   ├── useAuth.ts
+   └── useApi.ts
+
+❌ src/components/        (old - moved to features/auth/components/)
+   └── google-sign-in-button.tsx
+
+❌ src/constants/         (old - moved to core/constants/)
+   └── index.ts
+
+See CLEANUP_GUIDE.md for detailed cleanup instructions.
+
+================================================================================
+                        FILE STATISTICS
+================================================================================
+
+Location                                    Files    Purpose
+─────────────────────────────────────────────────────────────────────────────
+src/app/                                    4        Routing
+src/core/                                   4        Shared utilities
+src/features/auth/                          7        Auth feature
+src/features/home/                          2        Home feature
+src/features/                               2        Feature exports
+─────────────────────────────────────────────────────────────────────────────
+TOTAL:                                      19       New structure
+
+Documentation:
+PROJECT_STRUCTURE.md (overview)
+FEATURE_STRUCTURE_GUIDE.md (visual guide)
+CLEANUP_GUIDE.md (delete instructions)
+GOOGLE_AUTH_SETUP.md (OAuth setup)
+MIGRATION_COMPLETE.md (what changed)
+
+================================================================================
+                    QUICK START CHECKLIST
+================================================================================
+
+1. ✅ NEW STRUCTURE READY
+   - Features organized in src/features/
+   - Core utilities in src/core/
+   - App routing in src/app/
+
+2. ⬜ VERIFY SETUP (You do this)
+   $ npm start
+   Check for errors and verify app runs
+
+3. ⬜ DELETE OLD FILES (You do this)
+   Follow: CLEANUP_GUIDE.md
+   - Delete src/services/
+   - Delete src/hooks/
+   - Delete src/components/
+   - Delete src/constants/
+
+4. ⬜ TEST FEATURES
+   - Test Google Sign-In
+   - Test phone verification
+   - Test logout/login flow
+
+5. ⬜ START BUILDING
+   - Add new features to src/features/
+   - Follow the feature pattern
+   - Import from core/features
+
+================================================================================
+                    NEED HELP?
+================================================================================
+
+1. Understand the structure:
+   → Read: PROJECT_STRUCTURE.md
+
+2. Visual guide with examples:
+   → Read: FEATURE_STRUCTURE_GUIDE.md
+
+3. How to delete old files:
+   → Read: CLEANUP_GUIDE.md
+
+4. Setup Google OAuth:
+   → Read: GOOGLE_AUTH_SETUP.md
+
+5. What changed in migration:
+   → Read: MIGRATION_COMPLETE.md
+
+================================================================================
+                    Generated: May 16, 2025
+                    Architecture: Feature-Based
+                    Status: ✅ COMPLETE
+================================================================================
