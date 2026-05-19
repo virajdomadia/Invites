@@ -36,6 +36,12 @@
             "imageWidth": 76
           }
         }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.740993214769-brp1rsaalocv5k9rbklk999umprg86au"
+        }
       ]
     ],
     "experiments": {
