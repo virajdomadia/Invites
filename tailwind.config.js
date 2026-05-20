@@ -13,6 +13,11 @@ module.exports = {
         error: '#FF3B30',
         warning: '#FF9500',
       },
+      fontFamily: {
+        caveatbrush: ['CaveatBrush_400Regular', "'Caveat Brush'", 'cursive'],
+        lexend: ['Lexend_400Regular', 'Lexend_500Medium', 'Lexend_600SemiBold'],
+        literata: ['Literata_400Regular', 'Literata_500Medium', 'Literata_600SemiBold'],
+      },
     },
   },
   plugins: [],

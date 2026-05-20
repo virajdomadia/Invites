@@ -1,9 +1,5 @@
-import { View, Text } from 'react-native';
+import NewHomePage from '@/components/home/NewHomePage';
 
 export default function Home() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Welcome</Text>
-    </View>
-  );
+  return <NewHomePage />;
 }
