@@ -1,10 +1,9 @@
-'use client';
-
 import React, { useRef } from 'react';
 import { View, ScrollView, ImageBackground } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import HeaderSection from './HeaderSection';
 import HeroSection from './HeroSection';
+import ThemeImagesSection from './ThemeImagesSection';
 import HostPartySection from './HostPartySection';
 import GatherCeremonySection from './GatherCeremonySection';
 import TestimonialSection from './TestimonialSection';
@@ -45,6 +44,9 @@ export default function NewHomePage() {
         >
           <HeroSection onInvitesPress={handleInvitesScroll} />
         </ImageBackground>
+
+        {/* Theme Images Section */}
+        <ThemeImagesSection />
 
         {/* Host Party Section */}
         <View ref={hostPartySectionRef} className="px-4 sm:px-6 pt-6">

@@ -1,5 +1,3 @@
-'use client';
-
 import ZapigoSVG from '@/components/ui/ZapigoSVG';
 import { LightMode } from '@/theme';
 import { Image } from 'expo-image';
@@ -57,12 +55,12 @@ export default function HeroSection({ onInvitesPress }: HeroSectionProps) {
             <View style={{ flexDirection: 'row', gap: 6, width: '100%', marginBottom: 12 }}>
               <TouchableOpacity
                 onPress={onInvitesPress}
-                className="rounded-xl overflow-hidden justify-between px-3"
+                className="rounded-lg overflow-hidden justify-between px-3"
                 style={{ width: cardSize, height: cardSize, flex: 0 }}
               >
                 <Image
                   source={{ uri: imgInvites }}
-                  style={{ width: '100%', height: '100%', borderRadius: 12 }}
+                  style={{ width: '100%', height: '100%', borderRadius: 8 }}
                   contentFit="cover"
                 />
               </TouchableOpacity>
@@ -70,7 +68,7 @@ export default function HeroSection({ onInvitesPress }: HeroSectionProps) {
               <View className="rounded-xl overflow-hidden justify-between p-3" style={{ width: cardSize, height: cardSize, flex: 0 }}>
                 <Image
                   source={{ uri: imgEvents }}
-                  style={{ width: '100%', height: '100%', borderRadius: 12 }}
+                  style={{ width: '100%', height: '100%', borderRadius: 8 }}
                   contentFit="cover"
                 />
               </View>
@@ -78,34 +76,36 @@ export default function HeroSection({ onInvitesPress }: HeroSectionProps) {
               <View className="rounded-xl overflow-hidden justify-between p-3" style={{ width: cardSize, height: cardSize, flex: 0 }}>
                 <Image
                   source={{ uri: imgCommunities }}
-                  style={{ width: '100%', height: '100%', borderRadius: 12 }}
+                  style={{ width: '100%', height: '100%', borderRadius: 8 }}
                   contentFit="cover"
                 />
               </View>
             </View>
 
-            <View className="w-full rounded-xl overflow-hidden" style={{ marginBottom: 6 }}>
-              <Image
-                source={{ uri: imgPartySupplies }}
-                style={{ width: '100%', height: 80, borderRadius: 12 }}
-                contentFit="cover"
-              />
-            </View>
+            <View style={{ flexDirection: 'row', gap: 6, width: '100%', marginBottom: 12 }}>
+              <View className="rounded-lg overflow-hidden" style={{ width: cardSize, height: cardSize / 3.5, flex: 0 }}>
+                <Image
+                  source={{ uri: imgPartySupplies }}
+                  style={{ width: '100%', height: '100%', borderRadius: 8 }}
+                  contentFit="cover"
+                />
+              </View>
 
-            <View className="w-full rounded-xl overflow-hidden" style={{ marginBottom: 6 }}>
-              <Image
-                source={{ uri: imgReturnGifts }}
-                style={{ width: '100%', height: 80, borderRadius: 12 }}
-                contentFit="cover"
-              />
-            </View>
+              <View className="rounded-lg overflow-hidden" style={{ width: cardSize, height: cardSize / 3.5, flex: 0 }}>
+                <Image
+                  source={{ uri: imgReturnGifts }}
+                  style={{ width: '100%', height: '100%', borderRadius: 8 }}
+                  contentFit="cover"
+                />
+              </View>
 
-            <View className="w-full rounded-xl overflow-hidden">
-              <Image
-                source={{ uri: imgDelivered }}
-                style={{ width: '100%', height: 80, borderRadius: 12 }}
-                contentFit="cover"
-              />
+              <View className="rounded-lg overflow-hidden" style={{ width: cardSize, height: cardSize / 3.5, flex: 0 }}>
+                <Image
+                  source={{ uri: imgDelivered }}
+                  style={{ width: '100%', height: '100%', borderRadius: 8 }}
+                  contentFit="cover"
+                />
+              </View>
             </View>
           </>
         ) : (
@@ -125,12 +125,12 @@ export default function HeroSection({ onInvitesPress }: HeroSectionProps) {
               >
                 <Image
                   source={{ uri: imgInvites }}
-                  style={{ width: cardSize, height: cardSize, borderRadius: 12 }}
+                  style={{ width: cardSize, height: cardSize, borderRadius: 8 }}
                   contentFit="cover"
                 />
               </TouchableOpacity>
 
-              <View className="rounded-xl overflow-hidden" style={{ width: cardSize, height: cardSize, flex: 0 }}>
+              <View className="rounded-lg overflow-hidden" style={{ width: cardSize, height: cardSize, flex: 0 }}>
                 <Image
                   source={{ uri: imgEvents }}
                   style={{ width: cardSize, height: cardSize }}
@@ -138,7 +138,7 @@ export default function HeroSection({ onInvitesPress }: HeroSectionProps) {
                 />
               </View>
 
-              <View className="rounded-xl overflow-hidden" style={{ width: cardSize, height: cardSize, flex: 0 }}>
+              <View className="rounded-lg overflow-hidden" style={{ width: cardSize, height: cardSize, flex: 0 }}>
                 <Image
                   source={{ uri: imgCommunities }}
                   style={{ width: cardSize, height: cardSize }}
@@ -154,26 +154,26 @@ export default function HeroSection({ onInvitesPress }: HeroSectionProps) {
               contentContainerStyle={{ display: 'flex', flexDirection: 'row', gap: 12 }}
               scrollEnabled={true}
             >
-              <View className="rounded-xl overflow-hidden" style={{ width: cardSize, marginBottom: 6 }}>
+              <View className="rounded-lg overflow-hidden" style={{ width: cardSize, marginBottom: 6 }}>
                 <Image
                   source={{ uri: imgPartySupplies }}
-                  style={{ width: cardSize, height: 80, borderRadius: 12 }}
+                  style={{ width: cardSize, height: 80, borderRadius: 8 }}
                   contentFit="cover"
                 />
               </View>
 
-              <View className="rounded-xl overflow-hidden" style={{ width: cardSize, marginBottom: 6 }}>
+              <View className="rounded-lg overflow-hidden" style={{ width: cardSize, marginBottom: 6 }}>
                 <Image
                   source={{ uri: imgReturnGifts }}
-                  style={{ width: cardSize, height: 80, borderRadius: 12 }}
+                  style={{ width: cardSize, height: 80, borderRadius: 8 }}
                   contentFit="cover"
                 />
               </View>
 
-              <View className="rounded-xl overflow-hidden" style={{ width: cardSize }}>
+              <View className="rounded-lg overflow-hidden" style={{ width: cardSize }}>
                 <Image
                   source={{ uri: imgDelivered }}
-                  style={{ width: cardSize, height: 80, borderRadius: 12 }}
+                  style={{ width: cardSize, height: 80, borderRadius: 8 }}
                   contentFit="cover"
                 />
               </View>

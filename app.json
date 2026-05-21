@@ -40,7 +40,8 @@
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme": "com.googleusercontent.apps.740993214769-brp1rsaalocv5k9rbklk999umprg86au"
+          "iosUrlScheme": "com.googleusercontent.apps.740993214769-brp1rsaalocv5k9rbklk999umprg86au",
+          "androidClientId": "740993214769-mekqltq600uetn6tt23773rbo60ptu6i.apps.googleusercontent.com"
         }
       ]
     ],
@@ -53,7 +54,7 @@
       "eas": {
         "projectId": "4792167b-b338-473c-819e-a7f9a0e39c62"
       },
-      "apiUrl": "http://localhost:8000"
+      "apiUrl": "http://192.168.0.105:8000"
     }
   }
 }

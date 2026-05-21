@@ -17,6 +17,7 @@ import {
   Literata_500Medium,
   Literata_600SemiBold,
 } from '@expo-google-fonts/literata';
+import { useAuthInitialize } from '@/core/hooks/useAuthInitialize';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -31,15 +32,13 @@ export default function RootLayout() {
     Literata_600SemiBold,
   });
 
+  useAuthInitialize();
+
   useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
-
-  if (!fontsLoaded && !fontError) {
-    return null;
-  }
 
   return (
     <SafeAreaProvider>

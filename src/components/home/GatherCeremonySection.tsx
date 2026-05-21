@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ImageBackground, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,7 +27,7 @@ export default function GatherCeremonySection() {
         imageStyle={{ resizeMode: 'cover', borderRadius: 16 }}
       >
         <View style={{
-          flexDirection: isMobile ? 'column-reverse' : 'row-reverse',
+          flexDirection: isMobile ? 'column-reverse' : 'row',
           alignItems: isMobile ? 'flex-start' : 'center',
           justifyContent: isMobile ? 'flex-start' : 'space-between',
           gap: isMobile ? 24 : 48,

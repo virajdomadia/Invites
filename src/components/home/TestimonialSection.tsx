@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { View, Text, ScrollView, ImageBackground, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';

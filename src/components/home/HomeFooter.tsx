@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { View, Text, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { Palette, LightMode } from '@/theme';
