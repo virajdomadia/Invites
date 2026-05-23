@@ -1,4 +1,4 @@
-import { LightMode, Palette } from '@/theme';
+import { LightMode } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import {
@@ -61,9 +61,9 @@ function SummaryTile({
   return (
     <View style={{
       borderRadius: 8,
-      borderColor: Palette.light.border.secondary,
+      borderColor: LightMode.colorBorderSecondary,
       borderWidth: 1,
-      backgroundColor: Palette.light.background.primary,
+      backgroundColor: LightMode.colorBgPrimary,
       paddingHorizontal: 12,
       paddingVertical: 8,
     }}>
@@ -71,7 +71,7 @@ function SummaryTile({
         fontFamily: 'Lexend',
         fontSize: 11,
         lineHeight: 16,
-        color: Palette.light.text.tertiary,
+        color: LightMode.colorTextTertiary,
       }}>
         {label}
       </Text>
@@ -80,7 +80,7 @@ function SummaryTile({
         fontSize: 16,
         lineHeight: 24,
         fontWeight: '600',
-        color: Palette.light.text.primary,
+        color: LightMode.colorTextPrimary,
         marginTop: 4,
       }}>
         {String(value).padStart(2, '0')}
@@ -121,17 +121,28 @@ export function HostingEventListSection() {
           return;
         }
 
-        const events = response.data?.events || [];
+        console.log('API Response data:', JSON.stringify(response.data, null, 2));
+
+        // Check if response.data is directly an array or has an events property
+        let events = Array.isArray(response.data) ? response.data : response.data?.events;
+
         if (!Array.isArray(events)) {
-          console.error('Invalid hosting events response format:', typeof events);
+          console.error('Invalid hosting events response format:', typeof events, events);
           setHosting([]);
           return;
         }
 
-        const validatedEvents = events.filter(
-          (event: any): event is ActiveEvent =>
-            event && typeof event === 'object' && 'event_id' in event && 'summary' in event
-        );
+        console.log('Events to validate:', events.length, 'events');
+
+        const validatedEvents = events.filter((event: any) => {
+          const isValid = event && typeof event === 'object' && 'event_id' in event && 'summary' in event;
+          if (!isValid) {
+            console.warn('Filtering out invalid event:', event);
+          }
+          return isValid;
+        });
+
+        console.log('Validated events:', validatedEvents.length);
         setHosting(validatedEvents);
       } catch (error) {
         console.error('Failed to fetch hosting events:', error);
@@ -186,7 +197,7 @@ export function HostingEventListSection() {
             fontSize: 20,
             lineHeight: 28,
             fontWeight: '600',
-            color: Palette.light.text.primary,
+            color: LightMode.colorTextPrimary,
             marginBottom: 4,
           }}>
             Hosting
@@ -195,7 +206,7 @@ export function HostingEventListSection() {
             fontFamily: 'Lexend',
             fontSize: 14,
             lineHeight: 20,
-            color: Palette.light.text.tertiary,
+            color: LightMode.colorTextTertiary,
           }}>
             Occasions where you are a host
           </Text>
@@ -204,7 +215,7 @@ export function HostingEventListSection() {
         {/* Events List */}
         {isLoading ? (
           <View style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 40 }}>
-            <ActivityIndicator size="large" color={Palette.light.brand.primary} />
+            <ActivityIndicator size="large" color={LightMode.colorBrand600} />
           </View>
         ) : hosting.length > 0 ? (
           <ScrollView
@@ -223,7 +234,7 @@ export function HostingEventListSection() {
         ) : (
           <Text style={{
             fontSize: 14,
-            color: Palette.light.text.tertiary,
+            color: LightMode.colorTextTertiary,
             textAlign: 'center',
             paddingVertical: 20,
           }}>
@@ -377,26 +388,26 @@ function HostingEventCard({
         paddingHorizontal: 12,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: isHighlight ? Palette.light.brand.primary : Palette.light.border.secondary,
-        backgroundColor: isHighlight ? Palette.light.brand.light : Palette.light.background.secondary,
+        borderColor: isHighlight ? LightMode.colorBrand600 : LightMode.colorBorderSecondary,
+        backgroundColor: isHighlight ? LightMode.colorBgBrandPrimary : LightMode.colorBgSecondary,
         gap: 8,
         opacity: isLoading ? 0.6 : 1,
       }}
     >
       {isLoading ? (
-        <ActivityIndicator size="small" color={Palette.light.text.primary} />
+        <ActivityIndicator size="small" color={LightMode.colorTextPrimary} />
       ) : (
         <Ionicons
           name={icon as any}
           size={16}
-          color={isHighlight ? Palette.light.brand.primary : Palette.light.text.primary}
+          color={isHighlight ? LightMode.colorBrand600 : LightMode.colorTextPrimary}
         />
       )}
       <Text style={{
         fontFamily: 'Lexend',
         fontSize: 13,
         fontWeight: '500',
-        color: isHighlight ? Palette.light.brand.primary : Palette.light.text.primary,
+        color: isHighlight ? LightMode.colorBrand600 : LightMode.colorTextPrimary,
       }}>
         {label}
       </Text>
@@ -405,9 +416,9 @@ function HostingEventCard({
 
   return (
     <View style={{
-      backgroundColor: Palette.light.background.primary,
+      backgroundColor: LightMode.colorBgPrimary,
       borderRadius: 8,
-      borderColor: Palette.light.border.secondary,
+      borderColor: LightMode.colorBorderSecondary,
       borderWidth: 1,
       overflow: 'hidden',
     }}>
@@ -416,8 +427,8 @@ function HostingEventCard({
         paddingHorizontal: 16,
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: Palette.light.border.secondary,
-        backgroundColor: Palette.light.background.secondary,
+        borderBottomColor: LightMode.colorBorderSecondary,
+        backgroundColor: LightMode.colorBgSecondary,
       }}>
         <View style={{
           flexDirection: 'row',
@@ -431,7 +442,7 @@ function HostingEventCard({
               fontFamily: 'Lexend',
               fontSize: 14,
               fontWeight: '600',
-              color: Palette.light.text.primary,
+              color: LightMode.colorTextPrimary,
               flex: 1,
             }}
           >
@@ -441,13 +452,13 @@ function HostingEventCard({
             paddingHorizontal: 8,
             paddingVertical: 4,
             borderRadius: 6,
-            backgroundColor: Palette.light.brand.light,
+            backgroundColor: LightMode.colorBgBrandPrimary,
             marginLeft: 8,
           }}>
             <Text style={{
               fontSize: 11,
               fontWeight: '600',
-              color: Palette.light.brand.primary,
+              color: LightMode.colorBrand600,
             }}>
               {hostRole === 'CO-HOST' ? 'Co-Host' : 'Host'}
             </Text>
@@ -458,12 +469,12 @@ function HostingEventCard({
           <Ionicons
             name="calendar"
             size={14}
-            color={Palette.light.text.secondary}
+            color={LightMode.colorTextSecondary}
           />
           <Text style={{
             fontFamily: 'Lexend',
             fontSize: 12,
-            color: Palette.light.text.secondary,
+            color: LightMode.colorTextSecondary,
           }}>
             {formattedDate || 'Date TBD'}
           </Text>
@@ -477,7 +488,7 @@ function HostingEventCard({
             fontFamily: 'Lexend',
             fontSize: 12,
             fontWeight: '600',
-            color: Palette.light.text.primary,
+            color: LightMode.colorTextPrimary,
             marginBottom: 8,
           }}>
             Total Responses
@@ -520,7 +531,7 @@ function HostingEventCard({
               fontFamily: 'Lexend',
               fontSize: 12,
               fontWeight: '600',
-              color: Palette.light.text.primary,
+              color: LightMode.colorTextPrimary,
               marginBottom: 8,
             }}>
               Total Guest Counts
@@ -557,7 +568,7 @@ function HostingEventCard({
               fontFamily: 'Lexend',
               fontSize: 12,
               fontWeight: '600',
-              color: Palette.light.text.primary,
+              color: LightMode.colorTextPrimary,
               marginBottom: 8,
             }}>
               Guest Count by Food Preference
@@ -586,8 +597,8 @@ function HostingEventCard({
         paddingHorizontal: 12,
         paddingVertical: 12,
         borderTopWidth: 1,
-        borderTopColor: Palette.light.border.secondary,
-        backgroundColor: Palette.light.background.secondary,
+        borderTopColor: LightMode.colorBorderSecondary,
+        backgroundColor: LightMode.colorBgSecondary,
         gap: 8,
       }}>
         <ActionButton
