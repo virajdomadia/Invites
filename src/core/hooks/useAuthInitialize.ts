@@ -14,7 +14,7 @@ export function useAuthInitialize() {
       try {
         await initializeAuth();
       } catch (error) {
-        console.error('Auth initialization failed:', error);
+        // Silently continue - user will be prompted to login if needed
       } finally {
         setIsReady(true);
       }

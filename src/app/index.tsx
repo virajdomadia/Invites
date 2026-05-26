@@ -1,5 +1,10 @@
-import NewHomePage from '@/components/home/NewHomePage';
+import NewHomePage from '@/components/features/home/NewHomePage';
+import { ToastProvider } from '@/core/hooks/useToast';
 
 export default function Home() {
-  return <NewHomePage />;
+  return (
+    <ToastProvider>
+      <NewHomePage />
+    </ToastProvider>
+  );
 }

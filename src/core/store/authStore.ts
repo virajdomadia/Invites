@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Platform } from 'react-native';
-import { secureStorage, apiClient } from '@/core';
+import { secureStorage } from '@/core/storage/secure-storage';
+import { apiClient } from '@/core/api/api';
 import { googleOAuthService } from '@/core/auth/google-oauth-service';
 
 export interface User {
@@ -8,9 +9,10 @@ export interface User {
   email: string;
   name: string;
   phone_number?: string;
+  photo_url?: string;
 }
 
-interface AuthState {
+export interface AuthState {
   user: User | null;
   accessToken: string | null;
   refreshToken: string | null;
@@ -28,7 +30,7 @@ interface AuthState {
 
   // Auth flows
   initializeAuth: () => Promise<void>;
-  signInWithGoogle: (idToken: string, email?: string, name?: string) => Promise<User>;
+  signInWithGoogle: (idToken: string, email?: string, name?: string, photoUrl?: string) => Promise<User>;
   refreshAccessToken: () => Promise<string | null>;
   verifyPhoneNumber: (phoneNumber: string, otp: string) => Promise<void>;
   mergePhoneAccount: (phoneNumber: string, otp: string) => Promise<User>;
@@ -52,6 +54,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setTokens: (accessToken: string, refreshToken: string) => {
     set({ accessToken, refreshToken });
     apiClient.setAuthToken(accessToken);
+    apiClient.setRefreshToken(refreshToken);
+
+    // Persist tokens to secure storage
+    secureStorage.setItem('auth_access_token', accessToken);
+    if (refreshToken) {
+      secureStorage.setItem('auth_refresh_token', refreshToken);
+    }
+
+    // Register callback to update store when token is refreshed
+    apiClient.setTokenRefreshCallback((newToken: string) => {
+      set({ accessToken: newToken });
+      secureStorage.setItem('auth_access_token', newToken);
+    });
   },
 
   setIsLoading: (loading: boolean) => {
@@ -79,48 +94,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const storedName = await secureStorage.getItem('google_name');
       const storedUserId = await secureStorage.getItem('google_user_id');
       const storedPhoneNumber = await secureStorage.getItem('google_phone_number');
-
-      console.log('🔐 Auth initialization - Retrieved from storage:', {
-        hasToken: !!storedToken,
-        hasEmail: !!storedEmail,
-        email: storedEmail,
-        userId: storedUserId,
-      });
+      const storedPhotoUrl = await secureStorage.getItem('google_photo_url');
 
       if (storedToken && storedEmail) {
-        console.log('✅ Restoring session from secure storage');
         setTokens(storedToken, storedRefresh || '');
         setUser({
           id: storedUserId || storedEmail,
           email: storedEmail,
           name: storedName || 'User',
           phone_number: storedPhoneNumber || undefined,
+          photo_url: storedPhotoUrl || undefined,
         });
-      } else {
-        console.log('❌ No stored session found - user needs to login');
       }
     } catch (error) {
-      console.error('Failed to initialize auth:', error);
+      // Silently continue - user will need to login
     } finally {
       setIsLoading(false);
       set({ isAuthReady: true });
     }
   },
 
-  signInWithGoogle: async (idToken: string, email?: string, name?: string) => {
+  signInWithGoogle: async (idToken: string, email?: string, name?: string, photoUrl?: string) => {
     const { setUser, setTokens, setError, setIsNewUser } = get();
 
     try {
       set({ isLoading: true, error: null });
 
       const authResponse = await googleOAuthService.exchangeTokenForSession(idToken);
-
-      console.log('✅ Google OAuth response received:', {
-        hasToken: !!authResponse.access_token,
-        hasRefreshToken: !!authResponse.refresh_token,
-        isNewUser: authResponse.is_new_user,
-        providedEmail: email,
-      });
 
       setTokens(authResponse.access_token, authResponse.refresh_token || '');
       setIsNewUser(authResponse.is_new_user || false);
@@ -134,6 +134,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         id: userId,
         email: finalEmail,
         name: finalName,
+        photo_url: photoUrl,
       };
 
       // Persist user data to secure storage for session restoration
@@ -142,12 +143,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (user.id) {
         await secureStorage.setItem('google_user_id', user.id);
       }
-
-      console.log('💾 User data persisted to secure storage:', {
-        email: user.email,
-        name: user.name,
-        id: user.id,
-      });
+      if (photoUrl) {
+        await secureStorage.setItem('google_photo_url', photoUrl);
+      }
 
       setUser(user);
       return user;
@@ -169,7 +167,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
       return newToken;
     } catch (error) {
-      console.error('Token refresh failed:', error);
       get().setError(error instanceof Error ? error.message : 'Token refresh failed');
       return null;
     }

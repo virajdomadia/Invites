@@ -1,0 +1,107 @@
+import ZapigoSVG from '@/components/ui/ZapigoSVG';
+import { LightMode } from '@/theme';
+import { Image } from 'expo-image';
+import React from 'react';
+import { Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const imgInvites = 'https://ik.imagekit.io/zapigo/homepage/invites.png';
+const imgEvents = 'https://ik.imagekit.io/zapigo/homepage/events.png';
+const imgCommunities = 'https://ik.imagekit.io/zapigo/homepage/communities.png';
+const imgPartySupplies = 'https://ik.imagekit.io/zapigo/homepage/party_supplies.png';
+const imgReturnGifts = 'https://ik.imagekit.io/zapigo/homepage/return_gifts.png';
+const imgDelivered = 'https://ik.imagekit.io/zapigo/homepage/delivered.png';
+
+interface HeroSectionProps {
+  onInvitesPress?: () => void;
+}
+
+export default function HeroSection({ onInvitesPress }: HeroSectionProps) {
+  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+
+  const cardSize = Math.floor((width - 44) / 3);
+  const logoWidth = 160;
+  const gapSize = 'gap-2';
+
+  return (
+    <View className={`flex-col ${gapSize} items-start justify-center w-full`} style={{ paddingTop: insets.top + 32, paddingHorizontal: 16, paddingBottom: 16 }}>
+      {/* Logo and Text Section */}
+      <View className={`flex-col ${gapSize} items-start w-full mb-8`}>
+        {/* Logo */}
+        <View>
+          <ZapigoSVG width={logoWidth} color="#E91E63" />
+        </View>
+
+        {/* Heading */}
+        <Text className="font-caveatbrush font-normal" style={{ color: LightMode.colorTextPrimary, fontFamily: 'CaveatBrush_400Regular', fontSize: 36, lineHeight: 52 }}>
+          Find joy together.
+        </Text>
+
+        {/* Subheading */}
+        <Text className="text-base font-lexend font-medium leading-6" style={{ color: LightMode.colorTextPrimary, fontFamily: 'Lexend_500Medium', lineHeight: 24 }}>
+          Create invites, host events, manage communities, find party supplies, and choose return gifts - all from one place.
+        </Text>
+      </View>
+
+      {/* Feature Images Section */}
+      <View className="flex-col gap-6 w-full" style={{ paddingVertical: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 6, width: '100%', marginBottom: 12 }}>
+          <TouchableOpacity
+            onPress={onInvitesPress}
+            className="rounded-lg overflow-hidden justify-between px-3"
+            style={{ width: cardSize, height: cardSize, flex: 0 }}
+          >
+            <Image
+              source={{ uri: imgInvites }}
+              style={{ width: '100%', height: '100%', borderRadius: 8 }}
+              contentFit="cover"
+            />
+          </TouchableOpacity>
+
+          <View className="rounded-xl overflow-hidden justify-between p-3" style={{ width: cardSize, height: cardSize, flex: 0 }}>
+            <Image
+              source={{ uri: imgEvents }}
+              style={{ width: '100%', height: '100%', borderRadius: 8 }}
+              contentFit="cover"
+            />
+          </View>
+
+          <View className="rounded-xl overflow-hidden justify-between p-3" style={{ width: cardSize, height: cardSize, flex: 0 }}>
+            <Image
+              source={{ uri: imgCommunities }}
+              style={{ width: '100%', height: '100%', borderRadius: 8 }}
+              contentFit="cover"
+            />
+          </View>
+        </View>
+
+        <View style={{ flexDirection: 'row', gap: 6, width: '100%', marginBottom: 12 }}>
+          <View className="rounded-lg overflow-hidden" style={{ width: cardSize, height: cardSize / 3.5, flex: 0 }}>
+            <Image
+              source={{ uri: imgPartySupplies }}
+              style={{ width: '100%', height: '100%', borderRadius: 8 }}
+              contentFit="cover"
+            />
+          </View>
+
+          <View className="rounded-lg overflow-hidden" style={{ width: cardSize, height: cardSize / 3.5, flex: 0 }}>
+            <Image
+              source={{ uri: imgReturnGifts }}
+              style={{ width: '100%', height: '100%', borderRadius: 8 }}
+              contentFit="cover"
+            />
+          </View>
+
+          <View className="rounded-lg overflow-hidden" style={{ width: cardSize, height: cardSize / 3.5, flex: 0 }}>
+            <Image
+              source={{ uri: imgDelivered }}
+              style={{ width: '100%', height: '100%', borderRadius: 8 }}
+              contentFit="cover"
+            />
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}

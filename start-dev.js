@@ -13,7 +13,6 @@ const startExpo = (portIndex) => {
   }
 
   const port = ports[portIndex];
-  console.log(`\nAttempting to start on port ${port}...\n`);
 
   const expo = spawn('npx', ['expo', 'start', '--port', port.toString()], {
     stdio: 'inherit',
@@ -28,7 +27,6 @@ const startExpo = (portIndex) => {
 
   expo.on('exit', (code) => {
     if (code !== 0) {
-      console.log(`Expo exited with code ${code} on port ${port}`);
       startExpo(portIndex + 1);
     }
   });

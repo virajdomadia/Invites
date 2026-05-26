@@ -1,4 +1,5 @@
-import { apiClient, secureStorage } from '@/core';
+import { apiClient } from '@/core/api/api';
+import { secureStorage } from '@/core/storage/secure-storage';
 
 interface AuthResponse {
   access_token: string;
@@ -27,11 +28,23 @@ export class GoogleOAuthService {
 
   async exchangeTokenForSession(idToken: string): Promise<AuthResponse> {
     try {
-      const response = await apiClient.post<AuthResponse>(
-        '/c56/auth/login',
-        { id_token: idToken },
-        { 'Content-Type': 'application/json' }
+      console.log('[GoogleOAuth] Exchanging token for session...');
+
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('API request timeout after 30s')), 30000)
       );
+
+      const response = await Promise.race([
+        apiClient.post<AuthResponse>(
+          '/c56/auth/login',
+          { id_token: idToken },
+          { 'Content-Type': 'application/json' }
+        ),
+        timeoutPromise,
+      ]);
+
+      console.log('[GoogleOAuth] API Response:', { status: response.status, error: response.error, hasData: !!response.data, data: response.data });
 
       if (response.error || !response.data) {
         throw new Error(response.error || 'Failed to verify token');
@@ -64,7 +77,6 @@ export class GoogleOAuthService {
       }
       return token;
     } catch (error) {
-      console.error('Failed to retrieve stored session:', error);
       return null;
     }
   }
@@ -81,22 +93,11 @@ export class GoogleOAuthService {
 
   async logout(): Promise<void> {
     try {
-      // Revoke via Google Sign-In SDK (web)
-      const accessToken = await secureStorage.getItem('auth_access_token');
-      if (accessToken && typeof window !== 'undefined') {
-        try {
-          // @ts-ignore - google.accounts is loaded from Google's script
-          if (window.google?.accounts?.id?.revoke) {
-            window.google.accounts.id.revoke(accessToken, () => {
-              console.log('Google token revoked');
-            });
-          }
-        } catch (error) {
-          console.warn('Google revoke failed:', error);
-        }
-      }
-    } finally {
-      // Clear all local storage
+      // Logout handled by clearing session
+      // Native Google Sign-In handles revocation automatically
+      await this.clearSession();
+    } catch (error) {
+      // Silently fail - logout is best-effort
       await this.clearSession();
     }
   }

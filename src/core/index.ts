@@ -1,6 +1,6 @@
 // API
 export { apiClient } from './api/api';
-export { themeLibraryService } from './api/themeLibraryService';
+export { themeLibraryService } from '../services/theme';
 
 // Hooks
 export { useApi } from './hooks/useApi';
@@ -16,6 +16,3 @@ export { useAuthStore, type AuthState, type User } from './store/authStore';
 
 // Auth Service
 export { googleOAuthService } from './auth/google-oauth-service';
-
-// Constants
-export * from './constants';

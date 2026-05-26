@@ -3,12 +3,24 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@/assets/*": [
-        "./assets/*"
-      ]
+      "@/*": ["./src/*"],
+      "@/assets/*": ["./assets/*"],
+      "@/app/*": ["./src/app/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/components/ui/*": ["./src/components/ui/*"],
+      "@/components/features/*": ["./src/components/features/*"],
+      "@/components/shared/*": ["./src/components/shared/*"],
+      "@/core/*": ["./src/core/*"],
+      "@/core/api/*": ["./src/core/api/*"],
+      "@/core/auth/*": ["./src/core/auth/*"],
+      "@/core/hooks/*": ["./src/core/hooks/*"],
+      "@/core/storage/*": ["./src/core/storage/*"],
+      "@/core/store/*": ["./src/core/store/*"],
+      "@/services/*": ["./src/services/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/constants/*": ["./src/constants/*"],
+      "@/lib/*": ["./src/lib/*"]
     }
   },
   "include": [

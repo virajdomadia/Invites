@@ -1,9 +1,12 @@
 import Constants from 'expo-constants';
 
 const API_URL = Constants.expoConfig?.extra?.apiUrl ||
+  process.env.EXPO_PUBLIC_API_URL ||
   (process.env.NODE_ENV === 'development'
-    ? 'http://192.168.0.105:8000'
+    ? 'http://192.168.1.7:8000'
     : 'https://api.yourproduction.com');
+
+console.log('[API Client] Using API URL:', API_URL);
 
 interface ApiResponse<T> {
   data?: T;
@@ -14,6 +17,10 @@ interface ApiResponse<T> {
 class ApiClient {
   private baseUrl: string;
   private authToken: string | null = null;
+  private refreshToken: string | null = null;
+  private onTokenRefresh: ((newToken: string) => void) | null = null;
+  private isRefreshing = false;
+  private refreshPromise: Promise<string | null> | null = null;
 
   constructor(baseUrl: string = API_URL) {
     this.baseUrl = baseUrl;
@@ -23,10 +30,69 @@ class ApiClient {
     this.authToken = token;
   }
 
+  setRefreshToken(token: string | null): void {
+    this.refreshToken = token;
+  }
+
+  setTokenRefreshCallback(callback: (newToken: string) => void): void {
+    this.onTokenRefresh = callback;
+  }
+
+  private async refreshAccessToken(): Promise<string | null> {
+    if (this.isRefreshing && this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    this.isRefreshing = true;
+    this.refreshPromise = (async () => {
+      try {
+        if (!this.refreshToken) {
+          return null;
+        }
+
+        const url = `${this.baseUrl}/c56/auth/refresh`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            refresh_token: this.refreshToken,
+          }),
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (response.ok && data?.access_token) {
+          const newToken = data.access_token;
+          this.authToken = newToken;
+          this.onTokenRefresh?.(newToken);
+          console.log('[API] Token refreshed successfully');
+          return newToken;
+        } else {
+          console.error('[API] Token refresh failed', {
+            status: response.status,
+            data,
+          });
+          return null;
+        }
+      } catch (error) {
+        console.error('[API] Token refresh error:', error);
+        return null;
+      } finally {
+        this.isRefreshing = false;
+        this.refreshPromise = null;
+      }
+    })();
+
+    return this.refreshPromise;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
-    customHeaders: Record<string, string> = {}
+    customHeaders: Record<string, string> = {},
+    retried = false
   ): Promise<ApiResponse<T>> {
     try {
       const url = `${this.baseUrl}${endpoint}`;
@@ -36,14 +102,13 @@ class ApiClient {
         ...(options.headers as Record<string, string>),
       };
 
+      const hasAuthToken = !!this.authToken;
       if (this.authToken) {
         headers.Authorization = `Bearer ${this.authToken}`;
       }
 
       console.log(`[API] ${options.method || 'GET'} ${url}`, {
-        baseUrl: this.baseUrl,
-        endpoint,
-        hasAuth: !!this.authToken,
+        auth: hasAuthToken ? 'present' : 'missing',
       });
 
       const response = await fetch(url, {
@@ -53,7 +118,24 @@ class ApiClient {
 
       const data = await response.json().catch(() => null);
 
-      console.log(`[API] Response: ${response.status} from ${url}`);
+      if (response.status === 401 && !retried && this.refreshToken) {
+        console.log('[API] Got 401, attempting token refresh');
+        const newToken = await this.refreshAccessToken();
+
+        if (newToken) {
+          console.log('[API] Retrying request with new token');
+          return this.request<T>(endpoint, options, customHeaders, true);
+        }
+      }
+
+      if (!response.ok) {
+        console.error(`[API Error] ${options.method || 'GET'} ${url}`, {
+          status: response.status,
+          statusText: response.statusText,
+          auth: hasAuthToken ? 'present' : 'missing',
+          responseData: data,
+        });
+      }
 
       return {
         data: data,
@@ -62,7 +144,10 @@ class ApiClient {
       };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
-      console.error(`[API] Error calling ${options.method || 'GET'} ${this.baseUrl}${endpoint}:`, errorMsg);
+      console.error(`[API Error] ${errorMsg}`, {
+        endpoint,
+        auth: this.authToken ? 'present' : 'missing',
+      });
       return {
         status: 0,
         error: errorMsg,

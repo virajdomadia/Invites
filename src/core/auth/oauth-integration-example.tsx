@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import SignInModal from '@/components/modals/SignInModal';
+import SignInModal from '@/components/features/auth/SignInModal';
 import { useGoogleSignIn } from '@/core/hooks/useGoogleSignIn';
 import { googleOAuthService } from './google-oauth-service';
 

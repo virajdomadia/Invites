@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { Platform } from 'react-native';
 import { secureStorage } from '../storage/secure-storage';
 import { initializeGoogleSignIn } from '@/core/auth/google-signin-init';
 
@@ -7,6 +6,7 @@ interface GoogleSignInResult {
   idToken: string;
   email: string;
   name: string;
+  photoUrl?: string;
 }
 
 interface UseGoogleSignInReturn {
@@ -26,17 +26,18 @@ export function useGoogleSignIn(): UseGoogleSignInReturn {
       const storedToken = await secureStorage.getItem('google_id_token');
       const storedEmail = await secureStorage.getItem('google_email');
       const storedName = await secureStorage.getItem('google_name');
+      const storedPhotoUrl = await secureStorage.getItem('google_photo_url');
 
       if (storedToken && storedEmail) {
         return {
           idToken: storedToken,
           email: storedEmail,
           name: storedName || 'User',
+          photoUrl: storedPhotoUrl || undefined,
         };
       }
       return null;
     } catch (err) {
-      console.error('Failed to retrieve stored tokens:', err);
       return null;
     }
   }, []);
@@ -45,12 +46,7 @@ export function useGoogleSignIn(): UseGoogleSignInReturn {
     try {
       setIsLoading(true);
       setError(null);
-
-      if (Platform.OS === 'web') {
-        return await signInWeb();
-      } else {
-        return await signInNative();
-      }
+      return await signInNative();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Sign-in failed';
       setError(message);
@@ -72,6 +68,7 @@ export function useGoogleSignIn(): UseGoogleSignInReturn {
       const idToken = userInfo.data?.idToken;
       const email = userInfo.data?.user?.email;
       const name = userInfo.data?.user?.name;
+      const photoUrl = userInfo.data?.user?.photo;
 
       if (!idToken || !email) {
         throw new Error('Failed to get required user information from Google');
@@ -82,11 +79,15 @@ export function useGoogleSignIn(): UseGoogleSignInReturn {
       if (name) {
         await secureStorage.setItem('google_name', name);
       }
+      if (photoUrl) {
+        await secureStorage.setItem('google_photo_url', photoUrl);
+      }
 
       return {
         idToken,
         email,
         name: name || 'User',
+        photoUrl,
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Native sign-in failed';
@@ -94,89 +95,18 @@ export function useGoogleSignIn(): UseGoogleSignInReturn {
     }
   }, []);
 
-  const signInWeb = useCallback(async (): Promise<GoogleSignInResult> => {
-    try {
-      const AuthSession = await import('expo-auth-session');
-      const WebBrowser = await import('expo-web-browser');
-
-      const discovery = await AuthSession.useAutoDiscovery('https://accounts.google.com');
-
-      if (!discovery) {
-        throw new Error('OAuth discovery failed');
-      }
-
-      const request = new AuthSession.AuthRequest({
-        clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '',
-        scopes: ['openid', 'profile', 'email'],
-        redirectUrl: AuthSession.makeRedirectUri({
-          useProxy: true,
-        }),
-      });
-
-      if (!request) {
-        throw new Error('Failed to create auth request');
-      }
-
-      const result = await request.promptAsync(discovery, {
-        useProxy: true,
-      });
-
-      if (result?.type !== 'success') {
-        throw new Error('OAuth authentication was cancelled or failed');
-      }
-
-      const tokens = result.params.access_token
-        ? { idToken: result.params.id_token }
-        : await AuthSession.fetchIdTokenAsync(
-            {
-              clientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || '',
-            },
-            discovery
-          );
-
-      if (!tokens?.idToken) {
-        throw new Error('Failed to get ID token');
-      }
-
-      const decoded = decodeIdToken(tokens.idToken);
-      const email = decoded.email;
-      const name = decoded.name;
-
-      if (!email) {
-        throw new Error('Email not available in token');
-      }
-
-      await secureStorage.setItem('google_id_token', tokens.idToken);
-      await secureStorage.setItem('google_email', email);
-      if (name) {
-        await secureStorage.setItem('google_name', name);
-      }
-
-      return {
-        idToken: tokens.idToken,
-        email,
-        name: name || 'User',
-      };
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Web sign-in failed';
-      throw new Error(message);
-    }
-  }, []);
-
   const signOut = useCallback(async (): Promise<void> => {
     try {
       setIsLoading(true);
+      await initializeGoogleSignIn();
 
-      if (Platform.OS !== 'web') {
-        await initializeGoogleSignIn();
-
-        const { GoogleSignin } = require('@react-native-google-signin/google-signin');
-        await GoogleSignin.signOut();
-      }
+      const { GoogleSignin } = require('@react-native-google-signin/google-signin');
+      await GoogleSignin.signOut();
 
       await secureStorage.removeItem('google_id_token');
       await secureStorage.removeItem('google_email');
       await secureStorage.removeItem('google_name');
+      await secureStorage.removeItem('google_photo_url');
 
       setError(null);
     } catch (err) {
@@ -197,23 +127,3 @@ export function useGoogleSignIn(): UseGoogleSignInReturn {
   };
 }
 
-function decodeIdToken(token: string): { email: string; name: string } {
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      throw new Error('Invalid token format');
-    }
-
-    const decoded = JSON.parse(
-      Buffer.from(parts[1], 'base64').toString('utf-8')
-    );
-
-    return {
-      email: decoded.email || '',
-      name: decoded.name || '',
-    };
-  } catch (err) {
-    console.error('Failed to decode token:', err);
-    return { email: '', name: '' };
-  }
-}
